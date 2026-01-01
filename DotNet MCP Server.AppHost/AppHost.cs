@@ -1,5 +1,6 @@
 var builder = DistributedApplication.CreateBuilder(args);
 
-builder.AddProject<Projects.DotNet_MCP_Server>("dotnet-mcp-server");
+builder.AddProject<Projects.API>("dotnet-mcp-server");
+builder.AddMcpServer<Projects.DotNet_MCP_Server>("MCP Server");
 
 builder.Build().Run();

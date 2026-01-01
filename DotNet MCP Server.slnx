@@ -1,4 +1,5 @@
 <Solution>
+  <Project Path="API/API.csproj" />
   <Project Path="DotNet MCP Server.AppHost/DotNet MCP Server.AppHost.csproj" />
   <Project Path="DotNet MCP Server.ServiceDefaults/DotNet MCP Server.ServiceDefaults.csproj" />
   <Project Path="DotNet MCP Server/DotNet MCP Server.csproj" />
