@@ -16,6 +16,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\DotNet MCP Server\DotNet MCP Server.csproj" />
+	<ProjectReference Include="..\API\API.csproj" />  
   </ItemGroup>
 
 </Project>

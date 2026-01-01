@@ -7,9 +7,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Configuration.AddJsonFile("appsettings.json", optional: true);
 
-builder.Services
-    .AddMcpServer()
-    .WithHttpTransport()
+builder.Services.AddMcpServer()
+    .WithStdioServerTransport()
     .WithToolsFromAssembly();
 
 builder.Services.AddHttpClient();
@@ -18,8 +17,6 @@ builder.Services.Configure<ExternalApisOptions>(builder.Configuration.GetSection
 builder.Services.AddSingleton<IExternalAuthService, ExternalAuthService>();
 
 var app = builder.Build();
-
-app.MapMcp();
 
 app.Run();
 
