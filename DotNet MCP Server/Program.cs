@@ -1,15 +1,19 @@
 using Microsoft.Extensions.Options;
 using ModelContextProtocol.Server;
 using System.ComponentModel;
+//using McpServerApp.Helpers;
+using System.Reflection;
+using System.Linq;
 using McpServerApp.Helpers;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Configuration.AddJsonFile("appsettings.json", optional: true);
 
-builder.Services.AddMcpServer()
+builder.Services
+    .AddMcpServer()
     .WithStdioServerTransport()
-    .WithToolsFromAssembly();
+    .WithToolsFromAssembly(); // Loads tools from the current assembly
 
 builder.Services.AddHttpClient();
 builder.Services.AddSingleton<IHttpHelper, HttpHelper>();
@@ -19,6 +23,16 @@ builder.Services.AddSingleton<IExternalAuthService, ExternalAuthService>();
 var app = builder.Build();
 
 app.Run();
+
+[McpServerToolType]
+public static class MyTools
+{
+    [McpServerTool, Description("Adds two numbers")]
+    public static double Add(double a, double b)
+    {
+        return a + b;
+    }
+}
 
 // Options and services
 public record ExternalApisOptions
