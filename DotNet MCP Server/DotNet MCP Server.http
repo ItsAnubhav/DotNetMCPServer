@@ -1,0 +1,6 @@
+@DotNet_MCP_Server_HostAddress = http://localhost:5143
+
+GET {{DotNet_MCP_Server_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
