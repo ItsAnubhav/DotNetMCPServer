@@ -1,6 +1,7 @@
 using ModelContextProtocol.Server;
 using System.ComponentModel;
 using Microsoft.Extensions.Options;
+using McpServerApp.Services;
 
 namespace McpServerApp.Tools;
 
@@ -11,8 +12,7 @@ public static class FlightTools
     [Description("Search available flights between origin and destination on a date.")]
     public static async Task<string> FlightSearch(
         HttpClient httpClient,
-        IExternalAuthService authService,
-        IOptions<ExternalApisOptions> opts,
+        IAuthService authService,
         [Description("IATA origin code")] string origin,
         [Description("IATA destination code")] string destination,
         [Description("Date in YYYY-MM-DD")] string date,
@@ -39,8 +39,7 @@ public static class FlightTools
     [Description("Get booking details by booking id.")]
     public static async Task<string> BookingDetails(
         HttpClient httpClient,
-        IExternalAuthService authService,
-        IOptions<ExternalApisOptions> opts,
+        IAuthService authService,
         [Description("Booking identifier")] string bookingId,
         CancellationToken cancellationToken = default)
     {
@@ -64,8 +63,7 @@ public static class FlightTools
     [Description("Fetch fare rules by fare id.")]
     public static async Task<string> FareRules(
         HttpClient httpClient,
-        IExternalAuthService authService,
-        IOptions<ExternalApisOptions> opts,
+        IAuthService authService,
         [Description("Fare identifier")] string fareId,
         CancellationToken cancellationToken = default)
     {

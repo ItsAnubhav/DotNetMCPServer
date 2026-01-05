@@ -15,10 +15,10 @@ public interface IHttpHelper
 public class HttpHelper : IHttpHelper
 {
     private readonly IHttpClientFactory _factory;
-    private readonly IExternalAuthService _authService;
+    private readonly IAuthService _authService;
     private readonly JsonSerializerOptions _jsonOptions = new() { PropertyNameCaseInsensitive = true };
 
-    public HttpHelper(IHttpClientFactory factory, IExternalAuthService authService)
+    public HttpHelper(IHttpClientFactory factory, IAuthService authService)
     {
         _factory = factory;
         _authService = authService;
@@ -72,6 +72,10 @@ public class HttpHelper : IHttpHelper
     {
         try
         {
+            // Allow callers to opt-out of automatic auth (useful for acquiring the token itself).
+            if (req.Headers.Contains("X-Skip-Auth"))
+                return;
+
             var token = await _authService.GetTokenAsync(cancellationToken);
             if (!string.IsNullOrEmpty(token))
                 req.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
