@@ -27,8 +27,8 @@ builder.Services
     .WithToolsFromAssembly(); // Loads tools from the current assembly
 
 builder.Services.AddHttpClient();
-builder.Services.AddSingleton<IHttpHelper, HttpHelper>();
 builder.Services.AddSingleton<IAuthService, AuthService>();
+builder.Services.AddSingleton<IHttpHelper, HttpHelper>();
 builder.Services.AddSingleton<ISaudiaService, SaudiaService>();
 // builder.Services.Configure<ExternalApisOptions>(builder.Configuration.GetSection("ExternalApis"));
 // builder.Services.AddSingleton<IExternalAuthService, AuthService>();
