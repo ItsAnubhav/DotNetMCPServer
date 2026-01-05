@@ -6,10 +6,20 @@ using System.Linq;
 using McpServerApp.Helpers;
 using McpServerApp.Services;
 using McpServerApp.Services.Saudia;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Configuration.AddJsonFile("appsettings.json", optional: true);
+
+Log.Logger = new LoggerConfiguration()
+    .ReadFrom.Configuration(builder.Configuration)
+    .Enrich.FromLogContext()
+    .WriteTo.Console()
+    .WriteTo.File("logs/log-.txt", rollingInterval: Serilog.RollingInterval.Day)
+    .CreateLogger();
+
+builder.Host.UseSerilog();
 
 builder.Services
     .AddMcpServer()
@@ -24,7 +34,21 @@ builder.Services.AddSingleton<ISaudiaService, SaudiaService>();
 // builder.Services.AddSingleton<IExternalAuthService, AuthService>();
 
 var app = builder.Build();
-app.Run();
+
+try
+{
+    Log.Information("Starting application");
+    app.Run();
+}
+catch (Exception ex)
+{
+    Log.Fatal(ex, "Host terminated unexpectedly");
+    throw;
+}
+finally
+{
+    Log.CloseAndFlush();
+}
 
 [McpServerToolType]
 public static class MyTools
