@@ -1,9 +1,3 @@
-using System.Net.Http;
-using System.Net.Http.Json;
-using System.Threading;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Options;
-using McpServerApp.Helpers;
 using McpServerApp.Services.Saudia;
 using McpServerApp.Services.Saudia.Responses;
 
@@ -14,14 +8,14 @@ public interface IAuthService
 
 public class AuthService : IAuthService
 {
-    private readonly IHttpHelper _httpHelper;
+    private readonly IHttpClientFactory _factory;
     private readonly SemaphoreSlim _lock = new(1, 1);
     private string? _cachedToken;
     private DateTime _expiresAt = DateTime.MinValue;
 
-    public AuthService(IHttpHelper httpHelper)
+    public AuthService(IHttpClientFactory factory)
     {
-        _httpHelper = httpHelper;
+        _factory = factory;
     }
 
     public async Task<string?> GetTokenAsync(CancellationToken cancellationToken = default)
@@ -51,7 +45,8 @@ public class AuthService : IAuthService
             // tell HttpHelper to skip applying the bearer token for this request
             req.Headers.Add("X-Skip-Auth", "1");
 
-            var resp = await _httpHelper.SendAsync(req, cancellationToken);
+            var client = _factory.CreateClient();
+            var resp = await client.SendAsync(req, cancellationToken);
             if (!resp.IsSuccessStatusCode) return null;
 
             var payload = await resp.Content.ReadFromJsonAsync<AuthResponse>(cancellationToken: cancellationToken);
