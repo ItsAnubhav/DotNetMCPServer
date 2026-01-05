@@ -23,6 +23,7 @@ public static class SaudiaConstants{
 
 public interface ISaudiaService{
     Task<string?> GetTokenAsync(CancellationToken cancellationToken = default);
+    Task<OrderResponse?> GetOrderDetailsAsync(string pnr, string lastName, CancellationToken cancellationToken = default);
 }
 
 public class SaudiaService : ISaudiaService
@@ -81,6 +82,12 @@ public class SaudiaService : ISaudiaService
         {
             _lock.Release();
         }
+    }
+
+    public async Task<OrderResponse?> GetOrderDetailsAsync(string pnr, string lastName, CancellationToken cancellationToken = default)
+    {
+        var url = $"{SaudiaConstants.host}/b2b/b2bportal/orders/{pnr}?lastName={lastName}&guestOfficeId={SaudiaConstants.guestOfficeId}";
+        return await _httpHelper.GetJsonAsync<OrderResponse>(url, cancellationToken);
     }
 
 }
