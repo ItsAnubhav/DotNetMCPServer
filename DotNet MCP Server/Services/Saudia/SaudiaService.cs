@@ -4,22 +4,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Options;
 using McpServerApp.Helpers;
+using McpServerApp.Services.Saudia.Responses;
 
-namespace McpServerApp.Services;
-
-public static class SaudiaConstants{
-
-    public const string host = "http://dapi-uat.dcloud.saudia.com";
-
-    public const string ClientId = "ddb05723-34db-40d1-8236-31f7379ef537";
-    public const string ClientSecret = "12345678"; // Replace with actual secret
-    public const string Scope = "259a88f9-c8c4-4083-9a20-a80d018987d7/.default";
-    public const string Fact = "{\"keyValuePairs\":[{\"key\":\"flow\",\"value\":\"REVENUE\"},{\"key\":\"market\",\"value\":\"IND\"},{\"key\":\"originCity\",\"value\":\"JED\"},{\"key\":\"channel\",\"value\":\"DESKTOP\"}]}";
-
-    public const string guestOfficeId = "LONSV08AA";
-
-    public const string AuthEndpoint = $"{host}/session/auth/b2b/token/initialization";
-}
+namespace McpServerApp.Services.Saudia;
 
 public interface ISaudiaService{
     Task<string?> GetTokenAsync(CancellationToken cancellationToken = default);
@@ -40,9 +27,6 @@ public class SaudiaService : ISaudiaService
 
     public async Task<string?> GetTokenAsync(CancellationToken cancellationToken = default)
     {
-        if (!_opts.UseExternalAuth || string.IsNullOrEmpty(_opts.AuthEndpoint))
-            return null;
-
         if (_cachedToken is not null && DateTime.UtcNow < _expiresAt)
             return _cachedToken;
 

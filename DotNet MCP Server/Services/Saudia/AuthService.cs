@@ -4,6 +4,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Options;
 using McpServerApp.Helpers;
+using McpServerApp.Services.Saudia;
+using McpServerApp.Services.Saudia.Responses;
 
 public interface IAuthService
 {
@@ -24,9 +26,6 @@ public class AuthService : IAuthService
 
     public async Task<string?> GetTokenAsync(CancellationToken cancellationToken = default)
     {
-        if (!_opts.UseExternalAuth || string.IsNullOrEmpty(_opts.AuthEndpoint))
-            return null;
-
         if (_cachedToken is not null && DateTime.UtcNow < _expiresAt)
             return _cachedToken;
 

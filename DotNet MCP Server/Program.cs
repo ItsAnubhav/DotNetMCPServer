@@ -1,11 +1,11 @@
 using Microsoft.Extensions.Options;
 using ModelContextProtocol.Server;
 using System.ComponentModel;
-//using McpServerApp.Helpers;
 using System.Reflection;
 using System.Linq;
 using McpServerApp.Helpers;
 using McpServerApp.Services;
+using McpServerApp.Services.Saudia;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,11 +18,12 @@ builder.Services
 
 builder.Services.AddHttpClient();
 builder.Services.AddSingleton<IHttpHelper, HttpHelper>();
+builder.Services.AddSingleton<IAuthService, AuthService>();
+builder.Services.AddSingleton<ISaudiaService, SaudiaService>();
 // builder.Services.Configure<ExternalApisOptions>(builder.Configuration.GetSection("ExternalApis"));
 // builder.Services.AddSingleton<IExternalAuthService, AuthService>();
 
 var app = builder.Build();
-
 app.Run();
 
 [McpServerToolType]
