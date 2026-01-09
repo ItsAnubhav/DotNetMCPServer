@@ -7,27 +7,28 @@ using Microsoft.Extensions.Logging;
 using McpServerApp.Helpers;
 using McpServerApp.Services.Saudia;
 using McpServerApp.Services.Saudia.Responses;
+using McpServerApp.Services.Travog.Request;
 
-public interface IAuthService
+public interface IQLAuthService
 {
-    Task<string?> GetTokenAsync(CancellationToken cancellationToken = default);
+    Task<string?> GetTokenAsync(QLAuthRequest authRequest,CancellationToken cancellationToken = default);
 }
 
-public class AuthService : IAuthService
+public class QLAuthService : IQLAuthService
 {
     private readonly IHttpClientFactory _factory;
-    private readonly ILogger<AuthService> _logger;
+    private readonly ILogger<QLAuthService> _logger;
     private readonly SemaphoreSlim _lock = new(1, 1);
     private string? _cachedToken;
     private DateTime _expiresAt = DateTime.MinValue;
 
-    public AuthService(IHttpClientFactory factory, ILogger<AuthService> logger)
+    public QLAuthService(IHttpClientFactory factory, ILogger<QLAuthService> logger)
     {
         _factory = factory;
         _logger = logger;
     }
 
-    public async Task<string?> GetTokenAsync(CancellationToken cancellationToken = default)
+    public async Task<string?> GetTokenAsync(QLAuthRequest authRequest, CancellationToken cancellationToken = default)
     {
         if (_cachedToken is not null && DateTime.UtcNow < _expiresAt)
         {
@@ -41,20 +42,10 @@ public class AuthService : IAuthService
             if (_cachedToken is not null && DateTime.UtcNow < _expiresAt)
                 return _cachedToken;
 
-            _logger.LogInformation("AuthService: requesting token from {AuthEndpoint}", SaudiaConstants.AuthEndpoint);
-            var req = new HttpRequestMessage(HttpMethod.Post, SaudiaConstants.AuthEndpoint);
-
-            // Build form content using SaudiaConstants
-            var form = new Dictionary<string, string>
-            {
-                ["grant_type"] = "client_credentials",
-                ["client_id"] = SaudiaConstants.ClientId,
-                ["client_secret"] = SaudiaConstants.ClientSecret,
-                ["scope"] = SaudiaConstants.Scope,
-                ["fact"] = SaudiaConstants.Fact
-            };
-
-            req.Content = new FormUrlEncodedContent(form);
+            _logger.LogInformation("AuthService: requesting token from {AuthEndpoint}", TravogConstants.QLAuthEndpoint);
+            var req = new HttpRequestMessage(HttpMethod.Post, TravogConstants.QLAuthEndpoint);
+            // Use the provided authRequest as JSON body for the token request
+            req.Content = JsonContent.Create(authRequest);
             // tell HttpHelper to skip applying the bearer token for this request
             req.Headers.Add("X-Skip-Auth", "1");
 
@@ -84,5 +75,4 @@ public class AuthService : IAuthService
         }
     }
 
-    
 }

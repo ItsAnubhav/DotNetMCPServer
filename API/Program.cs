@@ -14,6 +14,12 @@ if (!string.IsNullOrEmpty(conn))
     builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(conn));
 }
 
+// Register QuadLabs auth service with HttpClient
+builder.Services.AddHttpClient<API.Services.IQuadLabsAuthService, API.Services.QuadLabsAuthService>(client =>
+{
+    client.BaseAddress = new Uri("https://preprod.quadlabs.net");
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
