@@ -1,6 +1,10 @@
 using API.Data;
+using API.Hubs;
 using System.Text.Json;
 using McpServerApp.Services.Travog;
+using API.Services;
+using OpenAI;
+using System.Net.Http.Headers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
@@ -13,6 +17,32 @@ builder.Services.AddControllers()
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddSignalR();
+
+// Register OpenAI HttpClient (uses config OpenAI:ApiKey and optional OpenAI:BaseUrl/OpenAI:Model)
+builder.Services.AddHttpClient("OpenAI", client =>
+{
+    var baseUrl = builder.Configuration["OpenAI:BaseUrl"] ?? "https://api.openai.com/";
+    client.BaseAddress = new Uri(baseUrl);
+    var apiKey = builder.Configuration["OpenAI:ApiKey"];
+    if (!string.IsNullOrEmpty(apiKey))
+    {
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
+    }
+    client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+});
+
+builder.Services.AddScoped<IAgentService, AgentService>();
+
+// Register OpenAI SDK client for server-side usage (uses OpenAI:ApiKey)
+builder.Services.AddSingleton(sp =>
+{
+    var apiKey = builder.Configuration["OpenAI:ApiKey"];
+    if (string.IsNullOrEmpty(apiKey))
+        throw new InvalidOperationException("OpenAI:ApiKey is not configured");
+
+    return new OpenAIClient(new OpenAIAuthentication(apiKey));
+});
 
 
 // Configure EF Core SQL Server
@@ -22,13 +52,6 @@ if (!string.IsNullOrEmpty(conn))
     builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(conn));
 }
 
-// Register QuadLabs auth service with HttpClient
-builder.Services.AddHttpClient<API.Services.IQuadLabsAuthService, API.Services.QuadLabsAuthService>(client =>
-{
-    client.BaseAddress = new Uri("https://preprod.quadlabs.net");
-});
-
-builder.Services.AddScoped<IQLAuthService, QLAuthService>();
 builder.Services.AddScoped<ITravogAPIService, TravogAPIService>();
 
 var app = builder.Build();
@@ -46,32 +69,10 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
-var summaries = new[]
-{
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
-
-app.MapGet("/weatherforecast", () =>
-{
-    var forecast =  Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
-})
-.WithName("GetWeatherForecast");
-
 // Map attribute-routed controllers (e.g., [ApiController], [Route("api/[controller]")])
 app.MapControllers();
 
-app.Run();
+// SignalR hubs
+app.MapHub<ChatHub>("/hub/chat");
 
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}
+app.Run();
