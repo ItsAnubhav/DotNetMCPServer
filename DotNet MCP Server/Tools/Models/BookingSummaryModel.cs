@@ -6,6 +6,12 @@ public class Baggage
     public string checkin { get; set; }
 }
 
+public class AirInfo
+{
+    public int? flightId { get; set; }
+    public List<Itinerary> flightSegment { get; set; }
+}
+
 public class Itinerary
 {
     public string from { get; set; }
@@ -28,7 +34,7 @@ public class BookingSummary
     public string status { get; set; }
     public string trip_type { get; set; }
     public List<Passenger> passengers { get; set; }
-    public List<Itinerary> itinerary { get; set; }
+    public AirInfo airInfo { get; set; }
     public Baggage baggage { get; set; }
     public bool change_allowed { get; set; }
     public bool cancellation_allowed { get; set; }
@@ -54,19 +60,22 @@ public class BookingSummary
                 })
                 .ToList(),
 
-            itinerary = booking.products.airInfo
-                .SelectMany(a => a.flightSegment)
-                .Select(f => new Itinerary
-                {
-                    from = f.depAirportCode,
-                    to = f.arrAirportCode,
-                    date = f.depDate,
-                    airline = f.airlineCode,
-                    flight = f.flightNumber,
-                    cabin = f.@class
-                })
-                .ToList(),
-
+            airInfo = new AirInfo
+            {
+                flightId = booking.products.airInfo.FirstOrDefault()?.flightId,
+                flightSegment = booking.products.airInfo
+                    .SelectMany(a => a.flightSegment)
+                    .Select(f => new Itinerary
+                    {
+                        from = f.depAirportCode,
+                        to = f.arrAirportCode,
+                        date = f.depDate,
+                        airline = f.airlineCode,
+                        flight = f.flightNumber,
+                        cabin = f.@class
+                    })
+                    .ToList()
+            },
             baggage = new Baggage
             {
                 cabin = "Included",
