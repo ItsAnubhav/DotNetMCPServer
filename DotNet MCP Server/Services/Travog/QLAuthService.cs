@@ -8,10 +8,14 @@ using McpServerApp.Helpers;
 using McpServerApp.Services.Saudia;
 using McpServerApp.Services.Saudia.Responses;
 using McpServerApp.Services.Travog.Request;
+using McpServerApp.Services.Travog.Response;
+
+namespace McpServerApp.Services.Travog;
 
 public interface IQLAuthService
 {
     Task<string?> GetTokenAsync(QLAuthRequest authRequest,CancellationToken cancellationToken = default);
+    Task<DataTokenResponse?> GetDataTokenAsync(string companyId, string userName, string password, CancellationToken cancellationToken = default);
 }
 
 public class QLAuthService : IQLAuthService
@@ -73,6 +77,57 @@ public class QLAuthService : IQLAuthService
         {
             _lock.Release();
         }
+    }
+
+    public async Task<DataTokenResponse?> GetDataTokenAsync(string companyId, string userName, string password, CancellationToken cancellationToken = default)
+    {
+        // curl --location 'https://preprod.quadlabs.net/XChangeauth/api/auth/generateToken' \
+        // --header 'accept: */*' \
+        // --header 'Content-Type: application/json' \
+        // --data-raw '{
+        // "companyId": "QLabs12345",
+        // "userName": "sa",
+        // "password": "Qu@d1@bs"
+        // }'
+
+        var url = "https://preprod.quadlabs.net/XChangeauth/api/auth/generateToken";
+        var req = new HttpRequestMessage(HttpMethod.Post, url);
+        req.Headers.Accept.ParseAdd("*/*");
+        var body = new
+        {
+            companyId,
+            userName,
+            password
+        };
+        req.Content = JsonContent.Create(body);
+        req.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
+        var client = _factory.CreateClient();
+        HttpResponseMessage resp;
+        try
+        {
+            resp = await client.SendAsync(req, cancellationToken);
+        }
+        catch (TaskCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            _logger.LogInformation("GetDataTokenAsync cancelled for companyId={CompanyId}", companyId);
+            throw;
+        }
+
+        if (!resp.IsSuccessStatusCode)
+        {
+            _logger.LogWarning("GetDataTokenAsync: upstream returned {StatusCode} for companyId={CompanyId}", resp.StatusCode, companyId);
+            return null;
+        }
+
+        var payload = await resp.Content.ReadFromJsonAsync<RootDataTokenResponse>(cancellationToken: cancellationToken);
+        if (payload is null)
+        {
+            _logger.LogWarning("GetDataTokenAsync: response payload was null for companyId={CompanyId}", companyId);
+            return null;
+        }
+
+        _logger.LogInformation("GetDataTokenAsync: acquired token for companyId={CompanyId}", companyId);
+        return payload.data;
     }
 
 }

@@ -6,6 +6,7 @@ using System.Linq;
 using McpServerApp.Helpers;
 using McpServerApp.Services;
 using McpServerApp.Services.Saudia;
+using McpServerApp.Services.Travog;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -30,6 +31,8 @@ builder.Services.AddHttpClient();
 builder.Services.AddSingleton<IAuthService, AuthService>();
 builder.Services.AddSingleton<IHttpHelper, HttpHelper>();
 builder.Services.AddSingleton<ISaudiaService, SaudiaService>();
+builder.Services.AddSingleton<IQLAuthService, QLAuthService>();
+builder.Services.AddSingleton<ITravogAPIService, TravogAPIService>();
 // builder.Services.Configure<ExternalApisOptions>(builder.Configuration.GetSection("ExternalApis"));
 // builder.Services.AddSingleton<IExternalAuthService, AuthService>();
 

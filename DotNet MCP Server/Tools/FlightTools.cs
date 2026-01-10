@@ -4,6 +4,7 @@ using Microsoft.Extensions.Options;
 using McpServerApp.Services;
 using McpServerApp.Services.Saudia;
 using Microsoft.Extensions.Logging;
+using McpServerApp.Services.Travog;
 
 namespace McpServerApp.Tools;
 
@@ -45,15 +46,14 @@ public static class FlightTools
     [Description("Get booking details by booking id.")]
     public static async Task<string> BookingDetails(
         HttpClient httpClient,
-        ISaudiaService saudiaService,
+        ITravogAPIService service,
         ILoggerFactory loggerFactory,
         [Description("Booking identifier")] string bookingId,
-        [Description("Passenger last name")] string lastName,
         CancellationToken cancellationToken = default)
     {
         var logger = loggerFactory.CreateLogger("FlightTools");
-        logger.LogInformation("BookingDetails: fetching booking {BookingId} for {LastName}", bookingId, lastName);
-        var orderDetails = await saudiaService.GetOrderDetailsAsync(bookingId, lastName, cancellationToken);
+        logger.LogInformation("BookingDetails: fetching booking {BookingId}", bookingId);
+        var orderDetails = await service.GetBookingDetailsAsync(bookingId, cancellationToken: cancellationToken);
         if (orderDetails is null)
         {
             logger.LogWarning("BookingDetails: failed to retrieve booking {BookingId}", bookingId);
