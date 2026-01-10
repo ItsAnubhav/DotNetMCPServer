@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.SignalR;
 using API.Models;
 using API.Services;
-using API.Services.BookingDetails;
 
 namespace API.Hubs;
 
@@ -37,8 +36,8 @@ public class ChatHub : Hub
                 await Clients.Caller.SendAsync("ConversationCreated", conversationId);
             }
 
-           
-             
+
+
 
 
             await Clients.Caller.SendAsync("ReceiveMessage", "assistant", "");
@@ -145,7 +144,7 @@ public class ChatHub : Hub
 
         await base.OnConnectedAsync();
     }
-     
+
     //public async Task ResumeConversation(string conversationId)
     //{
     //    try
@@ -183,7 +182,7 @@ public class ChatHub : Hub
         _logger.LogInformation("Client disconnected: {ConnectionId}", Context.ConnectionId);
         await base.OnDisconnectedAsync(exception);
     }
-     
+
     public async Task RegisterPageInfo(
     string token,
     string? page,

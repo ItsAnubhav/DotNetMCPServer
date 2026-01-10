@@ -44,6 +44,9 @@ builder.Services.AddSingleton(sp =>
     return new OpenAIClient(new OpenAIAuthentication(apiKey));
 });
 
+// Register MCP client that connects to the DotNet MCP Server and uses OpenAI (ChatGPT)
+builder.Services.AddScoped<McpChatClient>();
+
 
 // Configure EF Core SQL Server
 var conn = builder.Configuration.GetConnectionString("DefaultConnection");
