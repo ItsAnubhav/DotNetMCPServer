@@ -1,7 +1,21 @@
 using API.Data;
+using McpServerApp.Services.Travog;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Add services to the container.
+// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "API",
+        Version = "v1"
+    });
+});
 
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
@@ -20,12 +34,21 @@ builder.Services.AddHttpClient<API.Services.IQuadLabsAuthService, API.Services.Q
     client.BaseAddress = new Uri("https://preprod.quadlabs.net");
 });
 
+builder.Services.AddScoped<IQLAuthService, QLAuthService>();
+builder.Services.AddScoped<ITravogAPIService, TravogAPIService>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+    app.UseSwagger();
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "API v1");
+        c.RoutePrefix = string.Empty; // serve swagger UI at application root
+    });
 }
 
 var summaries = new[]
