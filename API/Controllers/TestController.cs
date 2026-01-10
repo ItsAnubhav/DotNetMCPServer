@@ -17,9 +17,9 @@ namespace API.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Test(string bookingId)
+        public async Task<IActionResult> Abc()
         {
-
+            var result = await service.GetBookingDetailsAsync("669463");
             return Ok("TestController is working!");
         }
 
