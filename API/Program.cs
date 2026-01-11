@@ -1,12 +1,13 @@
 using API.Data;
 using API.Hubs;
-using System.Text.Json;
-using McpServerApp.Services.Travog;
 using API.Services;
-using OpenAI;
-using System.Net.Http.Headers;
+using McpServerApp.Services.Travog;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using OpenAI;
+using System.Net.Http.Headers;
+//using API.Hubs;
+using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -41,7 +42,7 @@ builder.Services.AddSingleton(sp =>
     if (string.IsNullOrEmpty(apiKey))
         throw new InvalidOperationException("OpenAI:ApiKey is not configured");
 
-    return new OpenAIClient(new OpenAIAuthentication(apiKey));
+    return new OpenAIClient("");
 });
 
 // Register MCP client that connects to the DotNet MCP Server and uses OpenAI (ChatGPT)
@@ -76,6 +77,7 @@ if (app.Environment.IsDevelopment())
 app.MapControllers();
 
 // SignalR hubs
-app.MapHub<ChatHub>("/hub/chat");
+app.MapHub<ChatHub>("/chatHub");
+
 
 app.Run();
